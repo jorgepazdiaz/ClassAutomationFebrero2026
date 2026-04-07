@@ -10,13 +10,24 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 public class FormularioDefinitions {
     WebDriver hooks= Hooks.driver;
+    String RUTA= "src/test/resources/Data/data.csv";
+    String URL_FORMULARIO = "https://novustechnology.pe/practice-form/";
+    int registrosProcesadosCsv = 0;
+
     //llamar a la clase a utlizar
     PageTexto texto;
     PageClicks clicks;
@@ -36,7 +47,7 @@ public class FormularioDefinitions {
     //Steps
     @Given("que ingreso a la web de Novus Technology")
     public void queIngresoALaWebDeNovusTechnology() {
-        Hooks.driver.get("https://novustechnology.pe/practice-form/");
+        Hooks.driver.get(URL_FORMULARIO);
 
     }
 
@@ -72,7 +83,7 @@ public class FormularioDefinitions {
     }
 
     @And("ingreso un documento")
-    public void ingresoUnDocumento() {
+    public void ingresoUnDocumento() throws Exception {
         clicks.CargarDocumento();
     }
 
@@ -119,7 +130,7 @@ public class FormularioDefinitions {
     }
 
     @When("ingreso los datos del formulario")
-    public void ingresoLosDatosDelFormulario() {
+    public void ingresoLosDatosDelFormulario() throws Exception {
         texto.IngresarNombre();
         texto.IngresarApellido();
         clicks.ClickMusica();
@@ -219,5 +230,49 @@ public class FormularioDefinitions {
             texto.validarNombre(lista.get(i).get("nombre"));
             texto.validarApellido(lista.get(i).get("apellido"));
         }
+    }
+
+    @When("ingreso los datos del formulario desde el archivo csv")
+    public void ingresoLosDatosDelFormularioDesdeElArchivoCsv() throws IOException {
+        registrosProcesadosCsv = 0;
+
+        try (BufferedReader leerArchivo = Files.newBufferedReader(Paths.get(RUTA))) {
+            CSVFormat formato = CSVFormat.DEFAULT
+                    .withHeader("nombre","apellido","pasatiempo","genero","telefono","correo","departamento","ciudad","comando")
+                    .withSkipHeaderRecord()
+                    .withTrim();
+
+            Iterable<CSVRecord> registro = formato.parse(leerArchivo);
+
+            for (CSVRecord fila : registro) {
+                texto.IngresarNombre(fila.get("nombre"));
+                texto.IngresarApellido(fila.get("apellido"));
+                clicks.clickPasatiempo(fila.get("pasatiempo"));
+                clicks.clickGenero(fila.get("genero"));
+                texto.IngresarTelefono(fila.get("telefono"));
+                texto.IngresarCorreo(fila.get("correo"));
+                select.selectDepartamento(fila.get("departamento"));
+                select.selectCiudad(fila.get("ciudad"));
+                select.selectComando(fila.get("comando"));
+
+                button.ClickBotonEnviar();
+                texto.validarDatos();
+                texto.validarNombre(fila.get("nombre"));
+                texto.validarApellido(fila.get("apellido"));
+                button.ClickBotonClose();
+
+                registrosProcesadosCsv++;
+
+                // Reinicia el formulario para evitar acumulacion de datos entre filas
+                Hooks.driver.get(URL_FORMULARIO);
+            }
+        }
+
+    }
+
+    @Then("se procesan correctamente todos los registros del csv")
+    public void seProcesanCorrectamenteTodosLosRegistrosDelCsv() {
+        Assert.assertTrue("No se procesaron registros desde el CSV", registrosProcesadosCsv > 0);
+
     }
 }

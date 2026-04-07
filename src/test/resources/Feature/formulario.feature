@@ -90,3 +90,10 @@ Feature: Registrar Formulario Novus Technology
       | Fernando  | Cuadros    | deporte    | masculino | 1234567890 | fcuadroz@test.com    | LIMA         | LIMA   | Switch Commands     | /Users/jorgepazdiaz/Downloads/Formulario de solicitud de gastos.pdf |
       | Pedro     | Rodriguez  | musica     | masculino | 1234567890 | prodriguez@test.com  | LIMA         | LIMA   | Wait Commands       | /Users/jorgepazdiaz/Downloads/Formulario de solicitud de gastos.pdf |
       | Karola    | Hinostroza | lectura    | femenino  | 1234567890 | khinostroza@test.com | LIMA         | LIMA   | WebElement Commands | /Users/jorgepazdiaz/Downloads/Formulario de solicitud de gastos.pdf |
+
+
+    @Prueba6
+    Scenario: Probar con carga desde CSV
+      Given que ingreso a la web de Novus Technology
+      When ingreso los datos del formulario desde el archivo csv
+      Then se procesan correctamente todos los registros del csv

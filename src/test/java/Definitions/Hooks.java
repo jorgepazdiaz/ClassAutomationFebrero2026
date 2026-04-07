@@ -12,7 +12,7 @@ public class Hooks {
     @Before
     public static void setUp() {
         // Leer propiedad del sistema: -Dheadless=true  (por defecto true)
-        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false")); //true para headless, false para UI
+        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "true")); //true para headless, false para UI
         // Opciones recomendadas
         ChromeOptions options = new ChromeOptions();
         if (headless) {
@@ -41,6 +41,6 @@ public class Hooks {
     @After
     public static void tearDown() {
         driver.manage().deleteAllCookies();
-        driver.quit();
+        //driver.quit();
     }
 }
