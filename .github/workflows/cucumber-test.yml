@@ -1,0 +1,59 @@
+name: Cucumber Selenium Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # 🔑 Necesario para gh-pages
+
+jobs:
+  cucumber-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------
+      # JAVA
+      # -----------------------------
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '20'
+          distribution: 'temurin'
+
+      # -----------------------------
+      # NODE (CLAVE)
+      # -----------------------------
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # -----------------------------
+      # TESTS
+      # -----------------------------
+      - name: Run Selenium Cucumber tests
+        run: mvn clean test
+        continue-on-error: true
+
+      # -----------------------------
+      # REPORT
+      # -----------------------------
+      - name: Install Node dependencies (CI safe)
+        run: npm ci
+
+      - name: Generate Cucumber HTML Report
+        run: node index.js
+
+      # -----------------------------
+      # DEPLOY TO GITHUB PAGES
+      # -----------------------------
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: target/cucumber-html-report
