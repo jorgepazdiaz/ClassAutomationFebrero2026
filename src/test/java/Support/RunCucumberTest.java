@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         features ="src/test/resources/Feature",
         glue = "Definitions",
-        tags = "@Prueba6",
+        tags = "@Prueba",
         plugin = {
                 "pretty",
                 "json:target/cucumber-report/cucumber.json"
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
         monochrome = true
 )
 
-public class runTest {
+public class RunCucumberTest {
     @AfterClass
     public static void finish() {
         try {
